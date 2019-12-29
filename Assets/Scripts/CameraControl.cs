@@ -18,7 +18,7 @@ public class CameraControl : MonoBehaviour
     private float yaw = 0.0f;
     private float pitch = 0.0f;
 
-    public float movementSpeed = 30.0f;
+    public float movementSpeed = 20.0f;
 
 
     void Update()
@@ -45,7 +45,7 @@ public class CameraControl : MonoBehaviour
         //    Debug.Log("pressed a");
 
         //}
-        float time = Time.deltaTime * 10; 
+        float time = Time.deltaTime * 6; 
 
         if (Input.GetKey(KeyCode.W))
         {
@@ -88,11 +88,34 @@ public class CameraControl : MonoBehaviour
 
         //}
 
+        if (Input.GetMouseButtonDown(0))
+        {
+            RaycastHit target;
+
+            if(Physics.Raycast(transform.position, transform.forward, out target, 40) && target.collider.name.Contains(SceneScript.partName))
+            {
+                //Debug.Log("Hit " + target.collider);
+                //Debug.Log("parent is " + target.collider.transform.parent);
+                if (target.transform.parent)
+                {
+                target.transform.parent.transform.position += -transform.forward * 10;
+
+                }
+                else
+                {
+                    target.transform.position += -transform.forward * 10;
+                }
+            }
+        }
+
 
         if (Input.GetMouseButtonDown(1))
         {
-            Cursor.visible = true;
-            Cursor.lockState = CursorLockMode.None;
+            //Cursor.visible = !Cursor.visible;
+            if (Cursor.lockState == CursorLockMode.Locked)
+                Cursor.lockState = CursorLockMode.None;
+            else
+                Cursor.lockState = CursorLockMode.Locked;
         }
 
         if (Input.GetKeyDown(KeyCode.R))
@@ -101,4 +124,6 @@ public class CameraControl : MonoBehaviour
 
         }
     }
+
+    
 }
