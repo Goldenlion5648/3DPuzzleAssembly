@@ -5,21 +5,22 @@ using UnityEngine;
 public class SceneScript : MonoBehaviour
 {
     // Start is called before the first frame update
-    public Transform prefab;
-    public GameObject prefab2;
+    //public Transform prefab;
+    public GameObject originalCube;
 
     public static string partName = "cubePart";
     public static string textPartName = "textPart";
     public static string hasBeenUsedTag = "hasBeenUsed";
+    public static int maxNumAttached= 5;
 
 
-    void Start()
+    void Awake()
     {
-        Transform test = prefab.transform;
+        //Transform test = prefab.transform;
 
         int cubeDim = 3;
 
-        Vector3 startPos = prefab.position;
+        Vector3 startPos = originalCube.transform.position;
 
         float sideLength = 6;
 
@@ -40,21 +41,19 @@ public class SceneScript : MonoBehaviour
                     GameObject text = new GameObject();
                     TextMesh t = text.AddComponent<TextMesh>();
 
-
                     t.fontSize = 20;
                     curZPos += cubeSpacing;
                     //Transform newCube = Instantiate(prefab, new Vector3(curXPos, curYPos, curZPos), Quaternion.identity);
-                    GameObject newCube2 = Instantiate(prefab2, new Vector3(curXPos, curYPos, curZPos), Quaternion.identity);
+                    GameObject newCube = Instantiate(originalCube, new Vector3(curXPos, curYPos, curZPos), Quaternion.identity);
 
-                    newCube2.name = "cubePart" + total;
+                    newCube.name = "cubePart" + total;
                     text.name = textPartName + total;
 
-                    text.transform.parent = newCube2.transform;
+                    text.transform.parent = newCube.transform;
 
                     t.anchor = TextAnchor.MiddleCenter;
-                    t.transform.position = new Vector3(newCube2.transform.position.x, newCube2.transform.position.y, newCube2.transform.position.z - .5f);
+                    t.transform.position = new Vector3(newCube.transform.position.x, newCube.transform.position.y, newCube.transform.position.z - .5f);
                     t.text = total.ToString();
-
 
                     total++;
                     //Debug.Log("made new Cube");
@@ -69,7 +68,9 @@ public class SceneScript : MonoBehaviour
 
         //for (int y = 0; y < cubeDim; y++)
         //{
-        Random.InitState(5);
+
+        //tried seeds: 5, 15
+        Random.InitState(15);
         for (int i = 0; i < Mathf.Pow(cubeDim, 3); i++)
         {
             int addNewPartChecker = Random.Range(0, 3);
@@ -79,6 +80,8 @@ public class SceneScript : MonoBehaviour
             if (currentObjectBase.tag.Contains(hasBeenUsedTag))
                 continue;
 
+            cubeProperties properties = currentObjectBase.AddComponent<cubeProperties>();
+            
             int currentPartsAttached = 0;
             int currentNumPos = i;
             //total number of parts to attach
@@ -146,50 +149,91 @@ public class SceneScript : MonoBehaviour
         for (int i = 0; i < Mathf.Pow(cubeDim, 3); i++)
         {
             GameObject currentObject = GameObject.Find(partName + i);
+
+            bool foundParent = false;
+
+            GameObject potentialParent;
             if (currentObject.tag.Contains(hasBeenUsedTag) == false)
             {
                 if (i >= Mathf.Pow(cubeDim, 2))
                 {
-                    GameObject potentialParent = GameObject.Find(partName + (i - (int)(Mathf.Pow(cubeDim, 2))));
-                    addTag(ref currentObject, ref potentialParent);
+                    potentialParent = GameObject.Find(partName + (i - (int)(Mathf.Pow(cubeDim, 2))));
+                    foundParent = addTag(ref currentObject, ref potentialParent);
                 }
                 else
                 {
-                    GameObject potentialParent = GameObject.Find(partName + (i + (int)(Mathf.Pow(cubeDim, 2))));
-                    addTag(ref currentObject, ref potentialParent);
+                    potentialParent = GameObject.Find(partName + (i + (int)(Mathf.Pow(cubeDim, 2))));
+                    foundParent = addTag(ref currentObject, ref potentialParent);
                 }
+
+                if (foundParent == false)
+                {
+                    if (i % 3 != 0)
+                    {
+                        potentialParent = GameObject.Find(partName + (i - 1));
+                        foundParent = addTag(ref currentObject, ref potentialParent);
+                    }
+                    else
+                    {
+                        potentialParent = GameObject.Find(partName + (i + 1));
+                        foundParent = addTag(ref currentObject, ref potentialParent);
+                    }
+                }
+
+                //GameObject potentialParent = GameObject.Find(partName + (i - (int)(Mathf.Pow(cubeDim, 2))));
+                //foundParent = addTag(ref currentObject, ref potentialParent);
+
+                //if (foundParent == false)
+                //{
+                //    GameObject potentialParent = GameObject.Find(partName + (i + (int)(Mathf.Pow(cubeDim, 2))));
+                //    foundParent = addTag(ref currentObject, ref potentialParent);
+                //}
 
             }
 
         }
     }
 
-    public void addTag(ref GameObject currentObject, ref GameObject potentialParent)
+    public bool addTag(ref GameObject currentObject, ref GameObject potentialParent)
     {
+        if (potentialParent == null)
+            return false;
+
         if (potentialParent.tag.Contains(hasBeenUsedTag))
         {
             if (potentialParent.transform.parent != null)
             {
-                currentObject.transform.SetParent(potentialParent.transform.parent);
-                Debug.Log("attached leftover piece " + currentObject.name + " to " + potentialParent.transform.parent.name);
-                currentObject.tag = hasBeenUsedTag;
+                if (potentialParent.transform.parent.childCount < maxNumAttached)
+                {
+                    currentObject.transform.SetParent(potentialParent.transform.parent.transform);
+                    Debug.Log("1attached leftover piece " + currentObject.name + " to " + potentialParent.transform.parent.transform.name);
+                    currentObject.tag = hasBeenUsedTag;
+                    return true;
+                }
+                else
+                    return false;
             }
-            else
+
+            if (potentialParent.transform.childCount < maxNumAttached)
             {
                 currentObject.transform.SetParent(potentialParent.transform);
                 currentObject.tag = hasBeenUsedTag;
-                Debug.Log("attached leftover piece " + currentObject.name + " to " + potentialParent.name);
-
+                Debug.Log("2attached leftover piece " + currentObject.name + " to " + potentialParent.name);
+                return true;
             }
+
+
         }
-        else
+        if (potentialParent.tag.Contains(hasBeenUsedTag) == false)
         {
             currentObject.transform.SetParent(potentialParent.transform);
             Debug.Log("attached two leftover pieces " + currentObject.name + " to " + potentialParent.name);
 
             currentObject.tag = hasBeenUsedTag;
             potentialParent.tag = hasBeenUsedTag;
+            return true;
         }
+        return false;
     }
 
 

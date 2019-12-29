@@ -96,7 +96,7 @@ public class CameraControl : MonoBehaviour
             {
                 //Debug.Log("Hit " + target.collider);
                 //Debug.Log("parent is " + target.collider.transform.parent);
-                if (target.transform.parent)
+                if (target.transform.parent != null)
                 {
                 target.transform.parent.transform.position += -transform.forward * 10;
 
