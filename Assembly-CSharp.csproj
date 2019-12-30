@@ -66,6 +66,7 @@
     <Compile Include="Assets\Scripts\CameraControl.cs" />
     <Compile Include="Assets\Scripts\cubeProperties.cs" />
     <Compile Include="Assets\Scripts\SceneScript.cs" />
+    <Compile Include="Assets\Scripts\TitleScript.cs" />
     <Reference Include="Unity.Timeline.Editor">
       <HintPath>C:/Users/cobou/Documents/C# Games/Unity/3D Puzzle Assembly/Library/ScriptAssemblies/Unity.Timeline.Editor.dll</HintPath>
     </Reference>

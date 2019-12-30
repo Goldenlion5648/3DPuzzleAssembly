@@ -11,14 +11,22 @@ public class SceneScript : MonoBehaviour
     public static string partName = "cubePart";
     public static string textPartName = "textPart";
     public static string hasBeenUsedTag = "hasBeenUsed";
-    public static int maxNumAttached= 5;
+    public static string isParentTag = "isParent";
+    public static int maxNumAttached = 5;
+    public static bool shouldReset = false;
+    public static int cubeDim = 3;
 
 
     void Awake()
     {
+        setup();
+    }
+
+    void setup()
+    {
         //Transform test = prefab.transform;
 
-        int cubeDim = 3;
+
 
         Vector3 startPos = originalCube.transform.position;
 
@@ -70,7 +78,7 @@ public class SceneScript : MonoBehaviour
         //{
 
         //tried seeds: 5, 15
-        Random.InitState(15);
+        Random.InitState(25);
         for (int i = 0; i < Mathf.Pow(cubeDim, 3); i++)
         {
             int addNewPartChecker = Random.Range(0, 3);
@@ -81,11 +89,11 @@ public class SceneScript : MonoBehaviour
                 continue;
 
             cubeProperties properties = currentObjectBase.AddComponent<cubeProperties>();
-            
+
             int currentPartsAttached = 0;
             int currentNumPos = i;
             //total number of parts to attach
-            for (int j = 0; j < 3; j++)
+            for (int j = 0; j < maxNumAttached; j++)
             {
                 int directionDecider = Random.Range(0, 3);
 
@@ -146,6 +154,8 @@ public class SceneScript : MonoBehaviour
             }
             //string newText = GameObject.Find(textPartName + i).GetComponentsInChildren<Text>
         }
+
+        //get left over pieces
         for (int i = 0; i < Mathf.Pow(cubeDim, 3); i++)
         {
             GameObject currentObject = GameObject.Find(partName + i);
@@ -179,6 +189,16 @@ public class SceneScript : MonoBehaviour
                         foundParent = addTag(ref currentObject, ref potentialParent);
                     }
                 }
+                // check left edge
+                if (foundParent == false)
+                {
+                    if ((i) < (i / (int)(Mathf.Pow(cubeDim, 2)) + 1) * (Mathf.Pow(cubeDim, 2)) &&
+                        (i) >= ((i / (int)(Mathf.Pow(cubeDim, 2)) + 1) * (Mathf.Pow(cubeDim, 2))) - cubeDim)
+                    {
+                        potentialParent = GameObject.Find(partName + (i - cubeDim));
+                        foundParent = addTag(ref currentObject, ref potentialParent);
+                    }
+                }
 
                 //GameObject potentialParent = GameObject.Find(partName + (i - (int)(Mathf.Pow(cubeDim, 2))));
                 //foundParent = addTag(ref currentObject, ref potentialParent);
@@ -192,6 +212,13 @@ public class SceneScript : MonoBehaviour
             }
 
         }
+
+        //for (int i = 0; i < Mathf.Pow(cubeDim, 3); i++)
+        //{
+
+        //}
+
+
     }
 
     public bool addTag(ref GameObject currentObject, ref GameObject potentialParent)
@@ -241,7 +268,19 @@ public class SceneScript : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        //if (shouldReset)
+        //{
+        //    for (int i = 0; i < Mathf.Pow(cubeDim, 3); i++)
+        //    {
+        //        GameObject current = GameObject.Find(partName + (i));
+        //        Destroy(current);
+                
 
+        //    }
+        //    setup();
+
+        //    shouldReset = false;
+        //}
 
     }
 }

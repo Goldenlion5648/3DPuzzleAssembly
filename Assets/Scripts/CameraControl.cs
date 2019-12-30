@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class CameraControl : MonoBehaviour
 {
@@ -121,6 +122,12 @@ public class CameraControl : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.R))
         {
             UnityEditor.EditorApplication.isPlaying = false;
+
+        }
+
+        if (Input.GetKeyDown(KeyCode.V))
+        {
+            SceneManager.LoadScene("SampleScene");
 
         }
     }
