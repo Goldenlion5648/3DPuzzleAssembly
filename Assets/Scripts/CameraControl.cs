@@ -21,24 +21,34 @@ public class CameraControl : MonoBehaviour
 
     public float movementSpeed = 20.0f;
 
+    public static Transform selectedParent;
+
 
     void Update()
     {
-        yaw += speedH * Input.GetAxis("Mouse X");
-        pitch -= speedV * Input.GetAxis("Mouse Y");
-
-        transform.eulerAngles = new Vector3(pitch, yaw, 0.0f);
-
-        if(Input.mouseScrollDelta.y > 1 && transform.rotation.eulerAngles.magnitude < 30)
+        if (Cursor.lockState == CursorLockMode.Locked)
         {
-            transform.position += transform.rotation.eulerAngles;
+            yaw += speedH * Input.GetAxis("Mouse X");
+            if (pitch - speedV * Input.GetAxis("Mouse Y") > -90 && pitch - speedV * Input.GetAxis("Mouse Y") < 90)
+                pitch -= speedV * Input.GetAxis("Mouse Y");
+
+            transform.eulerAngles = new Vector3(pitch, yaw, 0.0f);
         }
-        //GameObject.Find("PlayerCamera")
+
+        float time = Time.deltaTime * 6;
         Vector3 pos = transform.position;
-        if (Input.GetButtonDown("Fire1"))
-        {
 
-        }
+        //if(Input.mouseScrollDelta.y > .1 /*&& transform.rotation.eulerAngles.magnitude < 30*/)
+        //{
+        //    //transform.position += transform.rotation.eulerAngles;
+        //    pos += Camera.main.transform.forward * movementSpeed * time *7;
+        //}
+        //else if (Input.mouseScrollDelta.y < -.1 /*&& transform.rotation.eulerAngles.magnitude < 30*/)
+        //{
+        //    //transform.position += transform.rotation.eulerAngles;
+        //    pos -= Camera.main.transform.forward * movementSpeed * time * 7;
+        //}
+        //GameObject.Find("PlayerCamera")
 
         //if (Input.GetKeyDown(KeyCode.A))
         //{
@@ -46,42 +56,104 @@ public class CameraControl : MonoBehaviour
         //    Debug.Log("pressed a");
 
         //}
-        float time = Time.deltaTime * 6; 
 
-        if (Input.GetKey(KeyCode.W))
+        if (selectedParent == null)
         {
-            pos += Camera.main.transform.forward * movementSpeed * time;
+            if (Input.GetKey(KeyCode.W))
+            {
+                pos += Camera.main.transform.forward * movementSpeed * time;
+
+            }
+
+            if (Input.GetKey(KeyCode.S))
+            {
+                pos -= Camera.main.transform.forward * movementSpeed * time;
+
+            }
+            if (Input.GetKey(KeyCode.A))
+            {
+                pos += Vector3.Cross(Camera.main.transform.forward, Vector3.up) * movementSpeed * time;
+
+            }
+            if (Input.GetKey(KeyCode.D))
+            {
+                pos -= Vector3.Cross(Camera.main.transform.forward, Vector3.up) * movementSpeed * time;
+
+            }
+
+            if (Input.GetKey(KeyCode.Space))
+            {
+                pos.y += movementSpeed * time / 2;
+
+            }
+
+            if (Input.GetKey(KeyCode.LeftShift))
+            {
+                pos.y -= movementSpeed * time / 2;
+
+            }
+            transform.position = pos;
 
         }
-
-        if (Input.GetKey(KeyCode.S))
+        else
         {
-            pos -= Camera.main.transform.forward * movementSpeed * time;
+            if (Input.GetKey(KeyCode.LeftShift))
+            {
 
+                if (Input.GetKeyDown(KeyCode.W))
+                {
+                    selectedParent.Rotate(new Vector3(90, 0, 0), Space.World);
+                }
+                if (Input.GetKeyDown(KeyCode.S))
+                {
+                    selectedParent.Rotate(new Vector3(-90, 0, 0), Space.World);
+                }
+                if (Input.GetKeyDown(KeyCode.A))
+                {
+                    selectedParent.Rotate(new Vector3(0, 0, 90), Space.World);
+                }
+                if (Input.GetKeyDown(KeyCode.D))
+                {
+                    selectedParent.Rotate(new Vector3(0, 0, -90), Space.World);
+                }
+                if (Input.GetKeyDown(KeyCode.E))
+                {
+                    selectedParent.Rotate(new Vector3(0, 90, 0), Space.World);
+                }
+                if (Input.GetKeyDown(KeyCode.F))
+                {
+                    selectedParent.Rotate(new Vector3(0, -90, 0), Space.World);
+                }
+            }
+            else
+            {
+                int moveDistance = 2;
+                if (Input.GetKeyDown(KeyCode.W))
+                {
+                    selectedParent.position += new Vector3(0, 0, moveDistance);
+                }
+                if (Input.GetKeyDown(KeyCode.S))
+                {
+                    selectedParent.position += new Vector3(0, 0, -moveDistance);
+                }
+                if (Input.GetKeyDown(KeyCode.A))
+                {
+                    selectedParent.position += new Vector3(-moveDistance, 0, 0);
+                }
+                if (Input.GetKeyDown(KeyCode.D))
+                {
+                    selectedParent.position += new Vector3(moveDistance, 0, 0);
+                }
+                if (Input.GetKeyDown(KeyCode.E))
+                {
+                    selectedParent.position += new Vector3(0, moveDistance, 0);
+                }
+                if (Input.GetKeyDown(KeyCode.F))
+                {
+                    selectedParent.position += new Vector3(0, -moveDistance, 0);
+                }
+            }
         }
-        if (Input.GetKey(KeyCode.A))
-        {
-            pos += Vector3.Cross(Camera.main.transform.forward, Vector3.up) * movementSpeed * time;
-
-        }
-        if (Input.GetKey(KeyCode.D))
-        {
-            pos -= Vector3.Cross(Camera.main.transform.forward, Vector3.up) * movementSpeed * time;
-
-        }
-
-        if (Input.GetKey(KeyCode.Space))
-        {
-            pos.y += movementSpeed * time / 2;
-
-        }
-
-        if (Input.GetKey(KeyCode.LeftShift))
-        {
-            pos.y -= movementSpeed * time / 2;
-
-        }
-        transform.position = pos;
 
         //if (Input.GetKeyDown(KeyCode.Space))
         //{
@@ -91,89 +163,121 @@ public class CameraControl : MonoBehaviour
 
         if (Input.GetMouseButtonDown(0))
         {
-            RaycastHit target;
-
-            if (Physics.Raycast(transform.position, transform.forward, out target, 40) && target.collider.name.Contains(SceneScript.partName))
+            if (selectedParent == null)
             {
-                //Debug.Log("Hit " + target.collider);
-                //Debug.Log("parent is " + target.collider.transform.parent);
+                RaycastHit target;
 
-                //it is the parent
-                if (target.transform.parent == null)
+                if (Physics.Raycast(transform.position, transform.forward, out target, 40) && target.collider.name.Contains(SceneScript.partName))
                 {
-                    target.transform.position += -transform.forward * 10;
-
-                    Renderer parentObject = target.transform.gameObject.GetComponent<Renderer>();
-                    TextMesh objectText = target.transform.gameObject.transform.GetComponentInChildren<TextMesh>();
-                    parentObject.material.SetColor("_Color", Color.green);
-                    objectText.color = Color.black;
-
-                    Transform[] targetObject2 = target.transform.GetComponentsInChildren<Transform>();
-                    Debug.Log("targetObject2.Length: " + targetObject2.Length);
-
-                    for (int i = 0; i < targetObject2.Length; i++)
+                    //it is the parent
+                    if (target.transform.parent == null)
                     {
-                        Debug.Log(targetObject2[i].ToString());
+                        //target.transform.position += -transform.forward * 10;
+                        selectedParent = target.transform;
+                        //Debug.Log("Selected Parent: " + selectedParent);
 
-                        if (targetObject2[i].name.Contains(SceneScript.textPartName))
+
+                        Renderer parentObject = target.transform.gameObject.GetComponent<Renderer>();
+                        TextMesh objectText = target.transform.gameObject.transform.GetComponentInChildren<TextMesh>();
+                        parentObject.material.SetColor("_Color", Color.green);
+                        objectText.color = Color.black;
+
+                        Transform[] targetObject2 = target.transform.GetComponentsInChildren<Transform>();
+                        //Debug.Log("targetObject2.Length: " + targetObject2.Length);
+
+                        for (int i = 0; i < targetObject2.Length; i++)
                         {
-                            TextMesh mesh2 = targetObject2[i].GetComponent<TextMesh>();
-                            mesh2.color = Color.white;
-                        }
-                        else
-                        {
-                            Renderer render = targetObject2[i].GetComponent<Renderer>();
-                            render.material.color = Color.green;
+                            //Debug.Log(targetObject2[i].ToString());
+
+                            if (targetObject2[i].name.Contains(SceneScript.textPartName))
+                            {
+                                TextMesh mesh2 = targetObject2[i].GetComponent<TextMesh>();
+                                mesh2.color = Color.white;
+                            }
+                            else
+                            {
+                                Renderer render = targetObject2[i].GetComponent<Renderer>();
+                                render.material.color = Color.green;
+                            }
+
                         }
 
                     }
-
-                }
-                else
-                {
-                    target.transform.parent.transform.position += -transform.forward * 10;
-
-                    Renderer parentObject = target.transform.parent.gameObject.GetComponent<Renderer>();
-                    TextMesh objectText = target.transform.parent.gameObject.transform.GetComponentInChildren<TextMesh>();
-                    parentObject.material.SetColor("_Color", Color.green);
-                    objectText.color = Color.black;
-
-                    Transform[] targetObject2 = target.transform.parent.GetComponentsInChildren<Transform>();
-                    Debug.Log("targetObject2.Length: " + targetObject2.Length);
-
-                    for (int i = 0; i < targetObject2.Length; i++)
+                    else
                     {
-                        Debug.Log(targetObject2[i].ToString());
+                        //target.transform.parent.transform.position += -transform.forward * 10;
 
-                        if (targetObject2[i].name.Contains(SceneScript.textPartName))
-                        {
-                            TextMesh mesh2 = targetObject2[i].GetComponent<TextMesh>();
-                            mesh2.color = Color.white;
-                        }
-                        else
-                        {
-                            Renderer render = targetObject2[i].GetComponent<Renderer>();
-                            render.material.color = Color.green;
-                        }
+                        selectedParent = target.transform.parent;
 
+                        //Debug.Log("Selected Parent: " + selectedParent);
+
+                        Renderer parentObject = target.transform.parent.gameObject.GetComponent<Renderer>();
+                        TextMesh objectText = target.transform.parent.gameObject.transform.GetComponentInChildren<TextMesh>();
+                        parentObject.material.SetColor("_Color", Color.green);
+                        objectText.color = Color.black;
+
+                        Transform[] targetObject2 = target.transform.parent.GetComponentsInChildren<Transform>();
+                        //Debug.Log("targetObject2.Length: " + targetObject2.Length);
+
+                        for (int i = 0; i < targetObject2.Length; i++)
+                        {
+                            //Debug.Log(targetObject2[i].ToString());
+
+                            if (targetObject2[i].name.Contains(SceneScript.textPartName))
+                            {
+                                TextMesh mesh2 = targetObject2[i].GetComponent<TextMesh>();
+                                mesh2.color = Color.white;
+                            }
+                            else
+                            {
+                                Renderer render = targetObject2[i].GetComponent<Renderer>();
+                                render.material.color = Color.green;
+                            }
+
+                        }
                     }
                 }
+
+            }
+            else
+            {
+                selectedParent = null;
             }
         }
 
 
         if (Input.GetMouseButtonDown(1))
         {
-            //Cursor.visible = !Cursor.visible;
-            if (Cursor.lockState == CursorLockMode.Locked)
-                Cursor.lockState = CursorLockMode.None;
+            if (selectedParent == null)
+            {
+
+                //Cursor.visible = !Cursor.visible;
+                if (Cursor.lockState == CursorLockMode.Locked)
+                    Cursor.lockState = CursorLockMode.None;
+                else
+                    Cursor.lockState = CursorLockMode.Locked;
+            }
             else
-                Cursor.lockState = CursorLockMode.Locked;
+            {
+                selectedParent = null;
+
+            }
         }
+
 
         if (Input.GetKeyDown(KeyCode.R))
         {
             UnityEditor.EditorApplication.isPlaying = false;
+
+        }
+
+        if (Input.GetKeyDown(KeyCode.N))
+        {
+            for (int i = 0; i < Mathf.Pow(SceneScript.cubeDim, 3); i++)
+            {
+                MeshRenderer mesh = GameObject.Find(SceneScript.textPartName + i).GetComponent<MeshRenderer>();
+                mesh.enabled = !mesh.enabled;
+            }
 
         }
 
@@ -184,5 +288,5 @@ public class CameraControl : MonoBehaviour
         }
     }
 
-    
+
 }

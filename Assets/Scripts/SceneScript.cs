@@ -16,6 +16,8 @@ public class SceneScript : MonoBehaviour
     public static bool shouldReset = false;
     public static int cubeDim = 3;
 
+    //public static 
+
 
     void Awake()
     {
@@ -26,15 +28,10 @@ public class SceneScript : MonoBehaviour
     {
         //Transform test = prefab.transform;
 
-
-
         Vector3 startPos = originalCube.transform.position;
-
         float sideLength = 6;
-
         float cubeSpacing = sideLength / cubeDim + 2;
-
-
+        //float cubeSpacing = sideLength / cubeDim ;
 
         float curXPos = 0;
         float curYPos = 1.5f;
@@ -73,12 +70,18 @@ public class SceneScript : MonoBehaviour
             curXPos = startPos.x;
         }
 
+        GameObject og = GameObject.Find("Cube");
+        Destroy(og);
+
 
         //for (int y = 0; y < cubeDim; y++)
         //{
 
         //tried seeds: 5, 15
-        Random.InitState(25);
+        //int seedNum = Random.Range(0, 100);
+        int seedNum =50;
+        Random.InitState(seedNum);
+        Debug.Log("Seed is: " + seedNum);
         for (int i = 0; i < Mathf.Pow(cubeDim, 3); i++)
         {
             int addNewPartChecker = Random.Range(0, 3);
@@ -200,25 +203,110 @@ public class SceneScript : MonoBehaviour
                     }
                 }
 
-                //GameObject potentialParent = GameObject.Find(partName + (i - (int)(Mathf.Pow(cubeDim, 2))));
-                //foundParent = addTag(ref currentObject, ref potentialParent);
+            }
 
-                //if (foundParent == false)
-                //{
-                //    GameObject potentialParent = GameObject.Find(partName + (i + (int)(Mathf.Pow(cubeDim, 2))));
-                //    foundParent = addTag(ref currentObject, ref potentialParent);
-                //}
+        }
+
+        //connect pieces with only 2 pieces
+        for (int i = 0; i < Mathf.Pow(cubeDim, 3); i++)
+        {
+            GameObject currentObject = GameObject.Find(partName + i);
+            GameObject parentObject;
+            int childCount;
+            if (currentObject.transform.parent != null)
+            {
+                //has a parent or alone
+                parentObject = currentObject.transform.parent.gameObject;
+                childCount = parentObject.transform.childCount;
+            }
+            else
+            {
+                //is the parent
+                parentObject = currentObject.transform.gameObject;
+                childCount = parentObject.transform.childCount;
+
+            }
+
+            if (childCount <= 2)
+            {
+                Debug.Log("checking " + (partName + i));
+                bool isDone = false;
+                int relativeReference = i + 9;
+                isDone = joinSmallerParts(relativeReference, parentObject);
+
+                if (isDone == false)
+                {
+                    relativeReference = i - 9;
+                    isDone = joinSmallerParts(relativeReference, parentObject);
+                }
+                if (isDone == false)
+                {
+                    relativeReference = i - 1;
+                    isDone = joinSmallerParts(relativeReference, parentObject);
+                }
+                if (isDone == false)
+                {
+                    relativeReference = i - 1;
+                    isDone = joinSmallerParts(relativeReference, parentObject);
+                }
+                if (isDone == false)
+                {
+                    relativeReference = i - 3;
+                    isDone = joinSmallerParts(relativeReference, parentObject);
+                }
+                if (isDone == false)
+                {
+                    relativeReference = i + 3;
+                    isDone = joinSmallerParts(relativeReference, parentObject);
+                }
 
             }
 
         }
 
-        //for (int i = 0; i < Mathf.Pow(cubeDim, 3); i++)
-        //{
+    }
 
-        //}
+    public bool joinSmallerParts(int relativeReference, GameObject parentObject)
+    {
+        if (GameObject.Find(partName + relativeReference) != null)
+        {
+            GameObject potentialAttachie = GameObject.Find(partName + relativeReference);
+            if (potentialAttachie.transform.IsChildOf(parentObject.transform) == false &&
+                parentObject.transform.IsChildOf(potentialAttachie.transform) == false)
+            {
+                //it is the parent
+                if (potentialAttachie.transform.parent == null)
+                {
+                    if (potentialAttachie.transform.childCount < 5)
+                    {
+                        parentObject.transform.SetParent(potentialAttachie.transform);
+                        for (int i = 0; i < parentObject.transform.childCount; i++)
+                        {
+                            parentObject.transform.GetChild(i).SetParent(potentialAttachie.transform);
 
+                        }
+                        return true;
 
+                    }
+                }
+                else //it has a parent
+                {
+                    if (potentialAttachie.transform.parent.childCount < 5)
+                    {
+                        parentObject.transform.SetParent(potentialAttachie.transform.parent.transform);
+                        for (int i = 0; i < parentObject.transform.childCount; i++)
+                        {
+                            parentObject.transform.GetChild(i).SetParent(potentialAttachie.transform.parent.transform);
+
+                        }
+                        return true;
+
+                    }
+                }
+
+            }
+        }
+        return false;
     }
 
     public bool addTag(ref GameObject currentObject, ref GameObject potentialParent)
@@ -274,7 +362,7 @@ public class SceneScript : MonoBehaviour
         //    {
         //        GameObject current = GameObject.Find(partName + (i));
         //        Destroy(current);
-                
+
 
         //    }
         //    setup();

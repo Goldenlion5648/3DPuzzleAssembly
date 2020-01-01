@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.SceneManagement;
+
 
 public class TitleScript : MonoBehaviour
 {
@@ -15,6 +17,12 @@ public class TitleScript : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+
+        if (Input.GetKeyDown(KeyCode.Break))
+        {
+            SceneManager.LoadScene("SampleScene");
+
+        }
         //if()
         ////GameObject inputArea = GameObject.Find("inputArea");
         ////GameObject inputArea = GameObject.;
