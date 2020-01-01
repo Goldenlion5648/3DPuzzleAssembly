@@ -29,7 +29,7 @@ public class CameraControl : MonoBehaviour
 
         transform.eulerAngles = new Vector3(pitch, yaw, 0.0f);
 
-        if(Input.mouseScrollDelta.y > 1)
+        if(Input.mouseScrollDelta.y > 1 && transform.rotation.eulerAngles.magnitude < 30)
         {
             transform.position += transform.rotation.eulerAngles;
         }
@@ -93,18 +93,70 @@ public class CameraControl : MonoBehaviour
         {
             RaycastHit target;
 
-            if(Physics.Raycast(transform.position, transform.forward, out target, 40) && target.collider.name.Contains(SceneScript.partName))
+            if (Physics.Raycast(transform.position, transform.forward, out target, 40) && target.collider.name.Contains(SceneScript.partName))
             {
                 //Debug.Log("Hit " + target.collider);
                 //Debug.Log("parent is " + target.collider.transform.parent);
-                if (target.transform.parent != null)
+
+                //it is the parent
+                if (target.transform.parent == null)
                 {
-                target.transform.parent.transform.position += -transform.forward * 10;
+                    target.transform.position += -transform.forward * 10;
+
+                    Renderer parentObject = target.transform.gameObject.GetComponent<Renderer>();
+                    TextMesh objectText = target.transform.gameObject.transform.GetComponentInChildren<TextMesh>();
+                    parentObject.material.SetColor("_Color", Color.green);
+                    objectText.color = Color.black;
+
+                    Transform[] targetObject2 = target.transform.GetComponentsInChildren<Transform>();
+                    Debug.Log("targetObject2.Length: " + targetObject2.Length);
+
+                    for (int i = 0; i < targetObject2.Length; i++)
+                    {
+                        Debug.Log(targetObject2[i].ToString());
+
+                        if (targetObject2[i].name.Contains(SceneScript.textPartName))
+                        {
+                            TextMesh mesh2 = targetObject2[i].GetComponent<TextMesh>();
+                            mesh2.color = Color.white;
+                        }
+                        else
+                        {
+                            Renderer render = targetObject2[i].GetComponent<Renderer>();
+                            render.material.color = Color.green;
+                        }
+
+                    }
 
                 }
                 else
                 {
-                    target.transform.position += -transform.forward * 10;
+                    target.transform.parent.transform.position += -transform.forward * 10;
+
+                    Renderer parentObject = target.transform.parent.gameObject.GetComponent<Renderer>();
+                    TextMesh objectText = target.transform.parent.gameObject.transform.GetComponentInChildren<TextMesh>();
+                    parentObject.material.SetColor("_Color", Color.green);
+                    objectText.color = Color.black;
+
+                    Transform[] targetObject2 = target.transform.parent.GetComponentsInChildren<Transform>();
+                    Debug.Log("targetObject2.Length: " + targetObject2.Length);
+
+                    for (int i = 0; i < targetObject2.Length; i++)
+                    {
+                        Debug.Log(targetObject2[i].ToString());
+
+                        if (targetObject2[i].name.Contains(SceneScript.textPartName))
+                        {
+                            TextMesh mesh2 = targetObject2[i].GetComponent<TextMesh>();
+                            mesh2.color = Color.white;
+                        }
+                        else
+                        {
+                            Renderer render = targetObject2[i].GetComponent<Renderer>();
+                            render.material.color = Color.green;
+                        }
+
+                    }
                 }
             }
         }
