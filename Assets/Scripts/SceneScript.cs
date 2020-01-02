@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class SceneScript : MonoBehaviour
 {
@@ -15,6 +16,8 @@ public class SceneScript : MonoBehaviour
     public static int maxNumAttached = 5;
     public static bool shouldReset = false;
     public static int cubeDim = 3;
+    public static int seedNum = 0;
+    public Text seedText;
 
     //public static 
 
@@ -30,11 +33,11 @@ public class SceneScript : MonoBehaviour
 
         Vector3 startPos = originalCube.transform.position;
         float sideLength = 6;
-        float cubeSpacing = sideLength / cubeDim + 2;
-        //float cubeSpacing = sideLength / cubeDim ;
+        //float cubeSpacing = sideLength / cubeDim + 2;
+        float cubeSpacing = sideLength / cubeDim;
 
         float curXPos = 0;
-        float curYPos = 1.5f;
+        float curYPos = 8.5f;
         float curZPos = 0;
         int total = 0;
         for (int y = 0; y < cubeDim; y++)
@@ -79,9 +82,15 @@ public class SceneScript : MonoBehaviour
 
         //tried seeds: 5, 15
         //int seedNum = Random.Range(0, 100);
-        int seedNum =50;
+        //int seedNum = 39;
+        if(seedNum == 0)
+        {
+            seedNum = Random.Range(1, 1000);
+        }
         Random.InitState(seedNum);
         Debug.Log("Seed is: " + seedNum);
+        seedText.text = "Seed: " + seedNum;
+
         for (int i = 0; i < Mathf.Pow(cubeDim, 3); i++)
         {
             int addNewPartChecker = Random.Range(0, 3);
@@ -231,37 +240,129 @@ public class SceneScript : MonoBehaviour
             {
                 Debug.Log("checking " + (partName + i));
                 bool isDone = false;
-                int relativeReference = i + 9;
+                int relativeReference = i + cubeDim * cubeDim;
                 isDone = joinSmallerParts(relativeReference, parentObject);
 
                 if (isDone == false)
                 {
-                    relativeReference = i - 9;
+                    relativeReference = i - cubeDim * cubeDim;
                     isDone = joinSmallerParts(relativeReference, parentObject);
                 }
                 if (isDone == false)
                 {
-                    relativeReference = i - 1;
-                    isDone = joinSmallerParts(relativeReference, parentObject);
+                    if (i / cubeDim == (i - 1) / cubeDim)
+                    {
+                        relativeReference = i - 1;
+                        isDone = joinSmallerParts(relativeReference, parentObject);
+                    }
                 }
                 if (isDone == false)
                 {
-                    relativeReference = i - 1;
-                    isDone = joinSmallerParts(relativeReference, parentObject);
+                    if (i / cubeDim == (i + 1) / cubeDim)
+                    {
+                        relativeReference = i + 1;
+                        isDone = joinSmallerParts(relativeReference, parentObject);
+                    }
                 }
                 if (isDone == false)
                 {
-                    relativeReference = i - 3;
-                    isDone = joinSmallerParts(relativeReference, parentObject);
+                    if (i / (cubeDim * cubeDim) == (i - cubeDim) / (cubeDim * cubeDim))
+                    {
+                        relativeReference = i - cubeDim;
+                        isDone = joinSmallerParts(relativeReference, parentObject);
+                    }
                 }
                 if (isDone == false)
                 {
-                    relativeReference = i + 3;
-                    isDone = joinSmallerParts(relativeReference, parentObject);
+                    if (i / (cubeDim * cubeDim) == (i + cubeDim) / (cubeDim * cubeDim))
+                    {
+                        relativeReference = i + cubeDim;
+                        isDone = joinSmallerParts(relativeReference, parentObject);
+                    }
                 }
 
             }
 
+        }
+
+        scramble();
+
+    }
+
+    public void scramble()
+    {
+        for (int i = 0; i < Mathf.Pow(cubeDim, 3); i++)
+        {
+            if (GameObject.Find(partName + i).transform.parent == null)
+            {
+                Transform parent = GameObject.Find(partName + i).transform;
+                //rotations
+                for (int j = 0; j < Random.Range(0, 4); j++)
+                {
+                    parent.Rotate(new Vector3(90, 0, 0), Space.World);
+                }
+
+                for (int j = 0; j < Random.Range(0, 4); j++)
+                {
+                    parent.Rotate(new Vector3(0, 90, 0), Space.World);
+                }
+                for (int j = 0; j < Random.Range(0, 4); j++)
+                {
+                    parent.Rotate(new Vector3(0, 0, 90), Space.World);
+                }
+
+                //positions
+                int directionModifier = Random.Range(-1, 2);
+                for (int k = 0; k < 10; k++)
+                {
+                    if (directionModifier == 0)
+                    {
+                        directionModifier = Random.Range(-1, 2);
+                    }
+                    else
+                    {
+                        break;
+                    }
+                }
+                for (int j = 0; j < Random.Range(0, 4); j++)
+                {
+                    parent.position += new Vector3(0, directionModifier * CameraControl.moveDistance, 0);
+                }
+                for (int k = 0; k < 10; k++)
+                {
+                    if (directionModifier == 0)
+                    {
+                        directionModifier = Random.Range(-1, 2);
+                    }
+                    else
+                    {
+                        break;
+                    }
+                }
+                for (int j = 0; j < Random.Range(0, 4); j++)
+                {
+                    parent.position += new Vector3(0, 0, directionModifier * CameraControl.moveDistance);
+                }
+                for (int k = 0; k < 10; k++)
+                {
+                    if (directionModifier == 0)
+                    {
+                        directionModifier = Random.Range(-1, 2);
+                    }
+                    else
+                    {
+                        break;
+                    }
+                }
+                for (int j = 0; j < Random.Range(0, 4); j++)
+                {
+                    parent.position += new Vector3(directionModifier * CameraControl.moveDistance, 0, 0);
+                }
+
+
+
+
+            }
         }
 
     }
@@ -282,8 +383,10 @@ public class SceneScript : MonoBehaviour
                         parentObject.transform.SetParent(potentialAttachie.transform);
                         for (int i = 0; i < parentObject.transform.childCount; i++)
                         {
-                            parentObject.transform.GetChild(i).SetParent(potentialAttachie.transform);
-
+                            if (parentObject.transform.GetChild(i).name.Contains(partName))
+                            {
+                                parentObject.transform.GetChild(i).transform.SetParent(potentialAttachie.transform);
+                            }
                         }
                         return true;
 
@@ -296,7 +399,10 @@ public class SceneScript : MonoBehaviour
                         parentObject.transform.SetParent(potentialAttachie.transform.parent.transform);
                         for (int i = 0; i < parentObject.transform.childCount; i++)
                         {
-                            parentObject.transform.GetChild(i).SetParent(potentialAttachie.transform.parent.transform);
+                            if (parentObject.transform.GetChild(i).name.Contains(partName))
+                            {
+                                parentObject.transform.GetChild(i).transform.SetParent(potentialAttachie.transform.parent.transform);
+                            }
 
                         }
                         return true;
@@ -352,23 +458,32 @@ public class SceneScript : MonoBehaviour
     }
 
 
-
+    void checkSolution()
+    {
+        //for (int i = 0; i < Mathf.Pow(cubeDim, 3); i++)
+        //{
+        //    GameObject current = GameObject.Find(partName + i);
+        //    if(current.c)
+        //    //if(current.)
+        //}
+    }
     // Update is called once per frame
     void Update()
     {
-        //if (shouldReset)
-        //{
-        //    for (int i = 0; i < Mathf.Pow(cubeDim, 3); i++)
-        //    {
-        //        GameObject current = GameObject.Find(partName + (i));
-        //        Destroy(current);
+        
+            //if (shouldReset)
+            //{
+            //    for (int i = 0; i < Mathf.Pow(cubeDim, 3); i++)
+            //    {
+            //        GameObject current = GameObject.Find(partName + (i));
+            //        Destroy(current);
 
 
-        //    }
-        //    setup();
+            //    }
+            //    setup();
 
-        //    shouldReset = false;
-        //}
+            //    shouldReset = false;
+            //}
 
-    }
+        }
 }

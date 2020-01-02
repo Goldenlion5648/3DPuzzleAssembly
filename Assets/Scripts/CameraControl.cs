@@ -9,6 +9,12 @@ public class CameraControl : MonoBehaviour
     void Start()
     {
         Cursor.lockState = CursorLockMode.Locked;
+
+        for (int i = 0; i < Mathf.Pow(SceneScript.cubeDim, 3); i++)
+        {
+            MeshRenderer mesh = GameObject.Find(SceneScript.textPartName + i).GetComponent<MeshRenderer>();
+            mesh.enabled = !mesh.enabled;
+        }
         //Cursor.visible = false;
     }
 
@@ -20,6 +26,8 @@ public class CameraControl : MonoBehaviour
     private float pitch = 0.0f;
 
     public float movementSpeed = 20.0f;
+
+    public static int moveDistance = 2;
 
     public static Transform selectedParent;
 
@@ -99,6 +107,7 @@ public class CameraControl : MonoBehaviour
         {
             if (Input.GetKey(KeyCode.LeftShift))
             {
+                //rotation
 
                 if (Input.GetKeyDown(KeyCode.W))
                 {
@@ -127,7 +136,8 @@ public class CameraControl : MonoBehaviour
             }
             else
             {
-                int moveDistance = 2;
+                //moving position
+                
                 if (Input.GetKeyDown(KeyCode.W))
                 {
                     selectedParent.position += new Vector3(0, 0, moveDistance);
@@ -169,6 +179,12 @@ public class CameraControl : MonoBehaviour
 
                 if (Physics.Raycast(transform.position, transform.forward, out target, 40) && target.collider.name.Contains(SceneScript.partName))
                 {
+                    for (int i = 0; i < Mathf.Pow(SceneScript.cubeDim, 3); i++)
+                    {
+                        GameObject current = GameObject.Find(SceneScript.partName + i);
+                        Renderer r = current.gameObject.GetComponent<Renderer>();
+                        r.material.SetColor("_Color", Color.red);
+                    }
                     //it is the parent
                     if (target.transform.parent == null)
                     {
@@ -265,11 +281,11 @@ public class CameraControl : MonoBehaviour
         }
 
 
-        if (Input.GetKeyDown(KeyCode.R))
-        {
-            UnityEditor.EditorApplication.isPlaying = false;
+        //if (Input.GetKeyDown(KeyCode.R))
+        //{
+        //    UnityEditor.EditorApplication.isPlaying = false;
 
-        }
+        //}
 
         if (Input.GetKeyDown(KeyCode.N))
         {
