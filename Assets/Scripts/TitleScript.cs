@@ -16,9 +16,19 @@ public class TitleScript : MonoBehaviour
         //    doneTypingSeed = new UnityEvent();
 
         //doneTypingSeed.AddListener(;
-        input.ActivateInputField();
+        SceneManager.UnloadSceneAsync("Scenes/SampleScene");
+        if (SceneScript.seedNum != 0)
+        {
+            input.text = SceneScript.seedNum.ToString();
+        }
 
-        
+        input.ActivateInputField();
+        //inpt
+        Cursor.visible = true;
+
+
+
+
     }
     
     
@@ -31,7 +41,14 @@ public class TitleScript : MonoBehaviour
         {
             SceneScript.seedNum = int.Parse(input.text);
             Debug.Log("Switching scenes");
+            Cursor.visible = false;
             SceneManager.LoadScene("Scenes/SampleScene");
+
+        }
+
+        if (Input.GetKeyDown(KeyCode.Escape))
+        {
+            Application.Quit();
 
         }
 

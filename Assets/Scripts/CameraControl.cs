@@ -119,19 +119,21 @@ public class CameraControl : MonoBehaviour
                 }
                 if (Input.GetKeyDown(KeyCode.A))
                 {
-                    selectedParent.Rotate(new Vector3(0, 0, 90), Space.World);
+                    selectedParent.Rotate(new Vector3(0, 90, 0), Space.World);
+
                 }
                 if (Input.GetKeyDown(KeyCode.D))
                 {
-                    selectedParent.Rotate(new Vector3(0, 0, -90), Space.World);
+                    selectedParent.Rotate(new Vector3(0, -90, 0), Space.World);
+
                 }
                 if (Input.GetKeyDown(KeyCode.E))
                 {
-                    selectedParent.Rotate(new Vector3(0, 90, 0), Space.World);
+                    selectedParent.Rotate(new Vector3(0, 0, 90), Space.World);
                 }
                 if (Input.GetKeyDown(KeyCode.F))
                 {
-                    selectedParent.Rotate(new Vector3(0, -90, 0), Space.World);
+                    selectedParent.Rotate(new Vector3(0, 0, -90), Space.World);
                 }
             }
             else
@@ -200,11 +202,9 @@ public class CameraControl : MonoBehaviour
 
                         Transform[] targetObject2 = target.transform.GetComponentsInChildren<Transform>();
                         //Debug.Log("targetObject2.Length: " + targetObject2.Length);
-
                         for (int i = 0; i < targetObject2.Length; i++)
                         {
                             //Debug.Log(targetObject2[i].ToString());
-
                             if (targetObject2[i].name.Contains(SceneScript.textPartName))
                             {
                                 TextMesh mesh2 = targetObject2[i].GetComponent<TextMesh>();
@@ -267,7 +267,7 @@ public class CameraControl : MonoBehaviour
             if (selectedParent == null)
             {
 
-                //Cursor.visible = !Cursor.visible;
+                Cursor.visible = !Cursor.visible;
                 if (Cursor.lockState == CursorLockMode.Locked)
                     Cursor.lockState = CursorLockMode.None;
                 else
@@ -300,6 +300,12 @@ public class CameraControl : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.V))
         {
             SceneManager.LoadScene("SampleScene");
+
+        }
+
+        if (Input.GetKeyDown(KeyCode.Escape))
+        {
+            SceneManager.LoadScene("titleScreen");
 
         }
     }
