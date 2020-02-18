@@ -1,5 +1,4 @@
 # 3DPuzzleAssembly 
-## By Colter Boudinot
 
 A game where the player must try to fit together the pieces to make a cube.
 
